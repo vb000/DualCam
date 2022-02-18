@@ -36,6 +36,7 @@
 #define HMCLK_PER 10
 #define HMCLK_PUL 5
 #define LINE_LENGTH 162
+#define LINE_HEIGHT 122
 #define FIFO_SZ 5
 /* USER CODE END PD */
 
@@ -63,11 +64,12 @@ uint8_t dummy[LINE_LENGTH];
 uint8_t line_received = 0;
 uint8_t FIFO_Index = 0;
 uint8_t uart_done = 1;
+uint8_t spi_done = 0;
 uint8_t startHM = 0;
-uint16_t counter_line = 0;
+uint8_t counter_line = 0;
 uint8_t end_frame = 0;
 uint32_t i = 0;
-uint32_t x = 0;
+uint32_t x[1];
 uint8_t UART_TxBuffer[3];
 GPIO_InitTypeDef GPIO_InitStruct = {0};
 /* USER CODE END PV */
@@ -126,94 +128,84 @@ int main(void)
   MX_UART4_Init();
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(HM_EN_GPIO_Port, HM_EN_Pin, GPIO_PIN_SET);
-//  HAL_Delay(10);
-  HAL_LPTIM_PWM_Start(&hlptim1, HMCLK_PER - 1, HMCLK_PUL - 1);
-//  HAL_Delay(10);
-//  HAL_NVIC_DisableIRQ(EXTI0_IRQn);
-//  HAL_NVIC_DisableIRQ(EXTI9_5_IRQn);
-  hm01b0_init(&hi2c1);
-  hm01b0_stream(&hi2c1, 0);
-//  HAL_Delay(1000);
-//  HAL_Delay(1000);
-//  HAL_Delay(1003);
-  UART_TxBuffer[1] = 'A';
-  UART_TxBuffer[2] = 'A';
-  UART_TxBuffer[0] = 'A';
-//  counter = 0;
-//  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
-//  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-//
-//  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
-//  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+    HAL_Delay(10);
+    HAL_LPTIM_PWM_Start(&hlptim1, HMCLK_PER - 1, HMCLK_PUL - 1);
 
-//  HAL_SPI_Receive_DMA(&hspi1, HM_Data + FIFO_Index*LINE_LENGTH, LINE_LENGTH);
-  //go to sleep
+    hm01b0_init(&hi2c1);
+    hm01b0_stream(&hi2c1, 0);
+
+    for(i = 0; i++; i < LINE_LENGTH){
+  	  dummy[i] = 0x00;
+    }
+  //  counter = 0;
+  //  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  //  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+  //
+  //  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+  //  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
+
+  //  HAL_SPI_Receive_DMA(&hspi1, HM_Data + FIFO_Index*LINE_LENGTH, LINE_LENGTH);
+    //go to sleep
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  HAL_SPI_Receive_DMA(&hspi1, HM_Data , LINE_LENGTH);
-//  HAL_SuspendTick();
-//
-//  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+    HAL_SPI_Receive_DMA(&hspi1, HM_Data , LINE_LENGTH);
+  //  HAL_SuspendTick();
+  //  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+    volatile HAL_StatusTypeDef o;
+    volatile HAL_StatusTypeDef s;
+    startHM = 0;
+    while(!startHM){}
+    while (1)
+    {
 
-  while (1)
-  {
-	  HAL_SPI_Receive_DMA(&hspi1, HM_Data + FIFO_Index , LINE_LENGTH);  //receive line, then enter sleep mode until the receive is over
-	  HAL_SuspendTick();
-	  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
-
-	  HAL_ResumeTick();
-	  int i = 1;
-//	  HM_Data[0] = 'a';
-//	  HM_Data[1] = 'a';
-//	  HM_Data[2] = 'a';
-//	  while(1){
-//		  HAL_UART_Transmit(&hlpuart1,  HM_Data, 3, 700);
-//		  HAL_SuspendTick();
-//		  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
-//
-//		  i = i + 3;
-//		  HM_Data[0+i] = 'a';
-//		  HM_Data[1+i] = 'a';
-//		  HM_Data[2+i] = 'a';
-//	  }
-	  HAL_UART_Transmit_DMA(&hlpuart1,  HM_Data + FIFO_Index, 165);
-
-  }
-////	  while(end_frame)
-////	  {
-//		  if (line_received == 1)
-//		  {
-//
-//			  line_received = 0;
-////			  UART_TxBuffer [0]= counter_line;
-////			  UART_TxBuffer [1]= FIFO_Index;
-////			  HM_Data[FIFO_Index*(LINE_LENGTH + 3) + LINE_LENGTH]= counter_line;
-////			  HM_Data[FIFO_Index*(LINE_LENGTH + 3) + LINE_LENGTH + 1]= FIFO_Index;
-////			  HM_Data[FIFO_Index*(LINE_LENGTH + 3) + LINE_LENGTH + 2]= '\n';
-//
-////			  if (uart_done)
-////			  {
-////				  uart_done = 0;
-////
-////			  }
-////			  HAL_SuspendTick();
-////			  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
-////			  HAL_SPI_Receive_DMA(&hspi1, HM_Data + FIFO_Index*(LINE_LENGTH + 3), LINE_LENGTH);
-//			  HAL_Delay(500);
-//			  HAL_StatusTypeDef s = HAL_SPI_Receive_DMA(&hspi1, HM_Data , LINE_LENGTH);
-//			  HAL_StatusTypeDef o = HAL_UART_Transmit_DMA(&hlpuart1,  HM_Data, 165);
-//			  //HAL_StatusTypeDef o = HAL_UART_Transmit_DMA(&hlpuart1,  HM_Data + FIFO_Index*(LINE_LENGTH + 3), 165);
-//
-//			  HAL_Delay(500);
-
-//	}
-
-//	  }
+  	  end_frame = 0;
+  	  counter_line = 1;
+  //	  spi_done = 0;
+  //	  o = HAL_SPI_Receive_DMA(&hspi1, HM_Data   + FIFO_Index*(LINE_LENGTH + 3), LINE_LENGTH);  //+ FIFO_Index*(LINE_LENGTH + 3) + LINE_LENGTH , LINE_LENGTH);  //receive line, then enter sleep mode until the receive is over
+  //	  HAL_SuspendTick();
+  //	  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
 
 
+  	  while (end_frame == 0)
+  	  {
+  		  HM_Data[0]= counter_line;
+  		  HM_Data[1]= 0;
+  		  HM_Data[2]= 0;
+  		  x[0] = counter_line;
+  		  HAL_UART_Transmit(&hlpuart1,  x, 1, 1000);
+  		  while(!spi_done){}
+  		  spi_done = 0;
+  		  HAL_SPI_Receive_DMA(&hspi1, HM_Data+ 3, LINE_LENGTH);  //receive line, then enter sleep mode until the receive is over
+  		  if(counter_line == 1)	{
+  			  HAL_SuspendTick();
+  			  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+  		  }
+  		  //while(!uart_done){}
+  		  //uart_done = 0;
+  		  //HAL_GPIO_WritePin(C0_GPIO_Port, C0_Pin, GPIO_PIN_SET); 				//UART PIN END
+  		  s = HAL_UART_Transmit_DMA(&huart4,  HM_Data, 165);
+  		  //HAL_GPIO_WritePin(C122_GPIO_Port, C122_Pin, GPIO_PIN_SET);			//SPI PIN END
+
+
+  		  if(FIFO_Index == FIFO_SZ)
+    		  {
+  			  FIFO_Index = 0;
+  		  }
+  	 	  counter_line ++;
+  	  }
+
+  	  while(!spi_done){}
+
+  	  HAL_UART_Transmit_DMA(&huart4,  dummy, 165);
+  	  HAL_SuspendTick();
+  	  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+  //	  }
+
+    }
 
     /* USER CODE END WHILE */
 
@@ -581,74 +573,71 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi1)
+void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi1)			//Not auto-gen
 {
-	FIFO_Index += 1;
-	if(FIFO_Index == FIFO_SZ)
-	{
-		FIFO_Index = 0;
-	}
+	spi_done = 1;
+	//HAL_GPIO_WritePin(C122_GPIO_Port, C122_Pin, GPIO_PIN_RESET);//SPI PIN END
 
-//	HAL_SPI_Receive_DMA(&hspi1, HM_Data + FIFO_Index*LINE_LENGTH, LINE_LENGTH);
+
 //	HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
 	line_received = 1;
-	HAL_GPIO_TogglePin(C122_GPIO_Port, C122_Pin);
+
 
 
 }
-void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi1)
+void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi1)			//Not auto-gen
 {
-//	FIFO_Index += 1;
-//	if(FIFO_Index == FIFO_SZ)
-//	{
-//		FIFO_Index = 0;
-//	}
 
-	HAL_GPIO_TogglePin(C0_GPIO_Port, C0_Pin);
+	spi_done = 1;
+	//HAL_GPIO_WritePin(C122_GPIO_Port, C122_Pin, GPIO_PIN_RESET);//SPI PIN END
 	i = HAL_SPI_GetError(hspi1);
 	line_received = 1;
 
 }
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)					//Not auto-gen
 {
-
-
 
 	if (GPIO_Pin == FVLD_Pin)
 	{
+//		if(1){
+//			line_received = 1;
+//		} else if(1)   {
+//			line_received = 0;
+//		}
+		end_frame = 1;
+		HAL_GPIO_TogglePin(C122_GPIO_Port, C122_Pin);
 
-		counter_line = 0;
-		end_frame= 1;
-
-
-
-
-
-
+		startHM = 1;
 	}
 
 	else if (GPIO_Pin == LVLD_Pin)
 	{
+//		end_frame = 1;
+//		if(LVLD_PIN == 1){
 //
-		counter_line ++;
-		if (counter_line == 122)
-		{
+//		} else {
+//
+//		}
 
-
-			end_frame = 0;
-
-		}
 	}
 
 
 
 }
-//void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart4)
-//{
-//	uart_done = 1;
-//
-//
-//}
+
+
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart4)	//already commented out
+{
+	HAL_GPIO_WritePin(C0_GPIO_Port, C0_Pin, GPIO_PIN_RESET); //UART PIN START
+	uart_done = 1;
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart4)	//already commented out
+{
+	HAL_GPIO_WritePin(C0_GPIO_Port, C0_Pin, GPIO_PIN_RESET); //UART PIN START
+	uart_done = 1;
+}
 /* USER CODE END 4 */
 
 /**
@@ -683,4 +672,3 @@ void assert_failed(uint8_t *file, uint32_t line)
 }
 #endif /* USE_FULL_ASSERT */
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
