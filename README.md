@@ -43,3 +43,19 @@ Debug/
 ```
 Pattern related to generated files are added to `.gitignore` so that they would be automatically ignored by git,
 when executing `git status` or `git add` commands.
+
+## Setting up Python environment for ImageProcessing scripts
+
+1. Create a virual environment:
+
+        python3 -m venv .dual-cam-venv
+
+2. Activate the environment:
+
+        source .dual-cam-venv/bin/activate
+
+3. Install required packages:
+
+        pip install -r requirements.txt
+
+Note: `.dual-cam-venv` is included in `.gitignore` so that it's not tracked by git.
