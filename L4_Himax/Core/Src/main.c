@@ -37,7 +37,7 @@
 #define HMCLK_PUL 5
 #define LINE_LENGTH 162
 #define LINE_HEIGHT 122
-#define FIFO_SZ 5
+#define FIFO_SZ 10
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
