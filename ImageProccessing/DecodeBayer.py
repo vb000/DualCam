@@ -29,8 +29,8 @@ if __name__ == "__main__":
 
     for inf, i in zip(file_paths, filenames):
         # Convert to rgb
-        raw = np.genfromtxt(inf, delimiter=',', dtype=np.uint8)
-        rgb =   cv2.cvtColor(raw, cv2.COLOR_BayerRGGB2BGR_VNG)
+        img = np.genfromtxt(inf, delimiter=',', dtype=np.uint8)
+        img = cv2.cvtColor(img, cv2.COLOR_BayerRGGB2BGR)
         # Write rgb to output file
         out_file_path = os.path.join(args.output_dir, str(i) + '.png')
-        cv2.imwrite(out_file_path, rgb)
+        cv2.imwrite(out_file_path, img)
