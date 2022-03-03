@@ -60,11 +60,15 @@ void hm01b0_init_fixed_rom_qvga_fixed(I2C_HandleTypeDef* hi2c)
 
 
     //Image size settings. Enable QQVGA.
-    hm_i2c_write(hi2c, REG_QVGA_WIN_EN, 0x01);//Enable QVGA Window
-    hm_i2c_write(hi2c, REG_BIN_RDOUT_X, 0x03);//Horizontal Binning enable
-    hm_i2c_write(hi2c, REG_BIN_RDOUT_Y, 0x03);//Vertical Binning enable
-    hm_i2c_write(hi2c, REG_BINNING_MODE, 0x03);//VERTICAL BIN MODE: Horizontal & Vertical
+//    hm_i2c_write(hi2c, REG_QVGA_WIN_EN, 0x01);//Enable QVGA Window
+//    hm_i2c_write(hi2c, REG_BIN_RDOUT_X, 0x03);//Horizontal Binning enable
+//    hm_i2c_write(hi2c, REG_BIN_RDOUT_Y, 0x03);//Vertical Binning enable
+//    hm_i2c_write(hi2c, REG_BINNING_MODE, 0x03);//VERTICAL BIN MODE: Horizontal & Vertical
 
+    hm_i2c_write(hi2c, REG_QVGA_WIN_EN, 0x00);//Enable QVGA Window
+    hm_i2c_write(hi2c, REG_BIN_RDOUT_X, 0x01);//full Horizontal
+    hm_i2c_write(hi2c, REG_BIN_RDOUT_Y, 0x01);// full Vertical
+    hm_i2c_write(hi2c, REG_BINNING_MODE, 0x00);//VERTICAL BIN MODE: Horizontal & Vertical disable
     /*looking at lattice cfg setting*/
 //    hm_i2c_write(hi2c, REG_SW_RESET,0x00);
 

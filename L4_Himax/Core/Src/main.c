@@ -19,7 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include "HM.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 //#include "HM.h"
@@ -33,10 +33,10 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
-#define HMCLK_PER 10
-#define HMCLK_PUL 5
-#define LINE_LENGTH 162
-#define LINE_HEIGHT 122
+#define HMCLK_PER 6
+#define HMCLK_PUL 3
+#define LINE_LENGTH 324
+#define LINE_HEIGHT 324
 #define FIFO_SZ 10
 /* USER CODE END PD */
 
@@ -60,7 +60,7 @@ DMA_HandleTypeDef hdma_spi1_rx;
 
 /* USER CODE BEGIN PV */
 uint8_t HM_Data[FIFO_SZ* (LINE_LENGTH+3)];
-uint8_t dummy[LINE_LENGTH];
+uint8_t dummy[LINE_LENGTH+3];
 uint8_t line_received = 0;
 uint8_t FIFO_Index = 0;
 uint8_t uart_done = 1;
@@ -134,7 +134,7 @@ int main(void)
     hm01b0_init(&hi2c1);
     hm01b0_stream(&hi2c1, 0);
 
-    for(i = 0; i++; i < LINE_LENGTH){
+    for(i = 0; i++; i < LINE_LENGTH+3){
   	  dummy[i] = 0x00;
     }
   //  counter = 0;
@@ -155,8 +155,7 @@ int main(void)
     HAL_SPI_Receive_DMA(&hspi1, HM_Data , LINE_LENGTH);
   //  HAL_SuspendTick();
   //  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
-    volatile HAL_StatusTypeDef o;
-    volatile HAL_StatusTypeDef s;
+
     startHM = 0;
     while(!startHM){}
     while (1)
@@ -170,13 +169,13 @@ int main(void)
   //	  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
 
 
+
   	  while (end_frame == 0)
   	  {
   		  HM_Data[0]= counter_line;
   		  HM_Data[1]= 0;
   		  HM_Data[2]= 0;
   		  x[0] = counter_line;
-  		  HAL_UART_Transmit(&hlpuart1,  x, 1, 1000);
   		  while(!spi_done){}
   		  spi_done = 0;
   		  HAL_SPI_Receive_DMA(&hspi1, HM_Data+ 3, LINE_LENGTH);  //receive line, then enter sleep mode until the receive is over
@@ -184,12 +183,15 @@ int main(void)
   			  HAL_SuspendTick();
   			  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
   		  }
-  		  //while(!uart_done){}
-  		  //uart_done = 0;
-  		  //HAL_GPIO_WritePin(C0_GPIO_Port, C0_Pin, GPIO_PIN_SET); 				//UART PIN END
-  		  s = HAL_UART_Transmit_DMA(&huart4,  HM_Data, 165);
-  		  //HAL_GPIO_WritePin(C122_GPIO_Port, C122_Pin, GPIO_PIN_SET);			//SPI PIN END
-
+  		  if(counter_line > 82 && counter_line < 243)
+  		  {
+			  //while(!uart_done){}
+			  //uart_done = 0;
+			  //HAL_GPIO_WritePin(C0_GPIO_Port, C0_Pin, GPIO_PIN_SET); 				//UART PIN END
+  			  HM_Data[4] = 2;
+  			  HAL_UART_Transmit_DMA(&huart4,  dummy, LINE_LENGTH+3);
+			  //HAL_GPIO_WritePin(C122_GPIO_Port, C122_Pin, GPIO_PIN_SET);			//SPI PIN END
+  		  }
 
   		  if(FIFO_Index == FIFO_SZ)
     		  {
@@ -199,10 +201,9 @@ int main(void)
   	  }
 
   	  while(!spi_done){}
+  	  HM_Data[4] = 1;
+  	  HAL_UART_Transmit_DMA(&huart4,  dummy, LINE_LENGTH+3);
 
-  	  HAL_UART_Transmit_DMA(&huart4,  dummy, 165);
-  	  HAL_SuspendTick();
-  	  HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
   //	  }
 
     }
