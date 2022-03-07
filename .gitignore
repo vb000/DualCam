@@ -55,6 +55,7 @@ dkms.conf
 .metadata/
 Debug/
 .mxproject
+.settings/
 
 # Misc
 .dual-cam-venv/
