@@ -31,7 +31,7 @@ if __name__ == "__main__":
     for inf, i in zip(file_paths, filenames):
         # Convert to rgb
         img = np.fromfile(inf, dtype=np.uint8)
-        img = np.reshape(img, (480, 640, 2))
+        img = np.reshape(img[:612480], (480, 638, 2))
         img = cv2.cvtColor(img, cv2.COLOR_YUV2BGR_YUY2)
         # Write rgb to output file
         out_file_path = os.path.join(args.output_dir, str(i) + '.png')
