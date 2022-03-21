@@ -27,30 +27,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     frame_size = args.frame_w*args.frame_h*args.pixel_size
-    
-    def find_footer(ser):
-        state = "0"
+
+    def find_footer(buf):
         i = 0
-        while(True):
-            val = ser[i]
-            i = i + 1
-            if state == "0":
-                if val == 13:
-                    state = "1"
-            elif state == "1":
-                if val == 0:
-                    state = "2"
-                elif val == 13:
-                    state == "1"
-                else:
-                    state = "0"
-            elif state == "2":
-                if val == 10:
-                    return i;
-                elif val == 13:
-                    state = "1"
-                else:
-                    state = "0"
+        while True:
+            if buf[i] == 13 and buf[i+1] == 0 and buf[i+2] == 10:
+                return i+3
+            i = i+1
     
     with serial.Serial(
             args.input_device, args.input_rate,
