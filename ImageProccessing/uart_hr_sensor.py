@@ -46,7 +46,7 @@ if __name__ == "__main__":
                     state = "0"
             elif state == "2":
                 if val == 10:
-                    return i + 1;
+                    return i;
                 elif val == 13:
                     state = "1"
                 else:
