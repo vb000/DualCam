@@ -2,6 +2,7 @@ import argparse
 import os
 import tracemalloc
 import picamera
+import time
 
 parser = argparse.ArgumentParser(
     description="Records a video from PiCamera.")
@@ -18,20 +19,25 @@ parser.add_argument('--output_dir', default='out',
 
 class Output(object):
     def __init__(self, out_dir=None):
-        self.frames = []
         self.out_dir = out_dir
         if not os.path.exists(self.out_dir):
             os.makedirs(self.out_dir)
+        self.frame_count = 0
+        self.total_write_time = 0
 
     def write(self, s):
-        self.frames.append(s)
+        t_stamp = time.time_ns() // 1000
+        filename = os.path.join(self.out_dir, '%d.jpg' % t_stamp)
+        with open(filename, 'wb') as f:
+            f.write(s)
+        self.frame_count += 1
+        t_stamp_end = time.time_ns() // 1000
+        self.total_write_time += t_stamp_end - t_stamp
 
     def flush(self):
-        print('%d frames are written' % len(self.frames))
-        for i, frm in enumerate(self.frames):
-            filename = os.path.join(self.out_dir, 'frame%d.jpg' % i)
-            with open(filename, 'wb') as f:
-                f.write(self.frames[i])
+        print('%d frames are written' % self.frame_count)
+        print("Avg. write time per frame: %d us" %
+              self.total_write_time / self.frame_count)
 
 if __name__ == "__main__":
     args = parser.parse_args()
