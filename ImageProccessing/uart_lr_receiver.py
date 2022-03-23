@@ -24,6 +24,8 @@ parser.add_argument('--group_size', default=3, type=int,
                     help="Number of frames in a frame group.")
 parser.add_argument('--output_dir', default='uart_lr_output',
                     help="Output directory with RGB frames.")
+parser.add_argument('--write_csv', default=0, type=int,
+                    help="Write raw csv files along with the images.")
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -62,6 +64,9 @@ if __name__ == "__main__":
                     "Wrong footer (%d, %d, %d) at frame %d" % (footer[0], footer[1], footer[2], i)
         frame = np.frombuffer(data_buffer, dtype=np.uint8, count=frame_size,
                               offset=offset)
+        if args.write_csv != 0:
+            out_file_path = os.path.join(args.output_dir, 'frame%d.csv' % i)
+            np.savetxt(out_file_path, frame, delimiter=',')
         offset += frame_size
         # Write rgb to output file
         frame.shape = (args.frame_h, args.frame_w)
