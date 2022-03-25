@@ -38,17 +38,17 @@ if __name__ == "__main__":
             if buf[i] == 13 and buf[i+1] == 0 and buf[i+2] == 10:
                 return i+3
             i = i+1
-    
+
     with serial.Serial(
             args.input_device, args.input_rate,
             timeout=args.n_frames+1) as ser:
         data_buffer = ser.read(
                 (frame_size + args.footer_size + 4)*(args.n_frames+1))
-    
+
     print("Serial Done!")
-    
+
     start_index = find_footer(data_buffer)
-    
+
     print("Start found at %d!" % start_index)
 
     offset = start_index
@@ -56,7 +56,7 @@ if __name__ == "__main__":
         if args.csv_dir is not None:
             if not os.path.exists(args.csv_dir):
                 os.makedirs(args.csv_dir)
-    
+
             raw_data = np.frombuffer(data_buffer, dtype=np.uint8,
                               count=(frame_size+args.footer_size+args.timestamp_size),
                               offset = offset)
@@ -67,8 +67,9 @@ if __name__ == "__main__":
         offset += frame_size
         time_stamp = np.frombuffer(data_buffer, dtype=np.uint8, count=args.timestamp_size,
                                    offset=offset)
+        time_stamp = int.from_bytes(time_stamp.tobytes(), "little",
+                                    signed="False")
         offset += args.timestamp_size
-        print(int.from_bytes(time_stamp.tobytes(), "little"))
         footer = np.frombuffer(data_buffer, dtype=np.uint8, count=args.footer_size,
                                offset=offset)
         offset += args.footer_size
@@ -80,6 +81,6 @@ if __name__ == "__main__":
             img = np.reshape(frame, (args.frame_h, args.frame_w, args.pixel_size))
             img = cv2.cvtColor(img, cv2.COLOR_YUV2BGR_YUY2)
             # Write rgb to output file
-            out_file_path = os.path.join(args.output_dir, 'frame%d.png' % i)
+            out_file_path = os.path.join(args.output_dir, '%08d_%08d.png' % (i, time_stamp))
             cv2.imwrite(out_file_path, img)
  
