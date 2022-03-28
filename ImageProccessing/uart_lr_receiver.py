@@ -32,8 +32,7 @@ parser.add_argument('--csv_dir', default=0, type=int,
 
 
 def lr_decoder(frame, w, h, bpp):
-    frame.shape = w, h
-    return frame 
+    return np.reshape(frame, (w, h))
 
 if __name__ == "__main__":
     args = parser.parse_args()

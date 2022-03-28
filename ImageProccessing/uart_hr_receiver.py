@@ -43,11 +43,11 @@ def uart_read_video(dev, rate, width, height, pix_depth, footer_size,
             dev, rate, timeout=timeout*(n_frames+1)) as ser:
         data_buffer = ser.read(
                 (frame_size+footer_size+timestamp_size)*(n_frames+1))
-    
+
     print("Serial read done!")
- 
+
     start_index = find_footer(data_buffer)
-    
+
     print("Start found at %d!" % start_index)
 
     if not os.path.exists(output_dir):
@@ -78,7 +78,7 @@ def uart_read_video(dev, rate, width, height, pix_depth, footer_size,
 def yuv_decoder(frame, w, h, bpp):
     frame = np.reshape(frame, (w, h, bpp))
     frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_YUY2)
-    return frame 
+    return frame
 
 if __name__ == "__main__":
     args = parser.parse_args()
