@@ -18,6 +18,8 @@ parser.add_argument('--pixel_size', default=1, type=int,
                     help="Pixel size in bytes.")
 parser.add_argument('--footer_size', default=3, type=int,
                     help="Size of the footer sent after each frame in bytes.")
+parser.add_argument('--timestamp_size', default=4, type=int,
+                    help="Size of the footer sent after each frame in bytes.")
 parser.add_argument('--n_frames', default=10, type=int,
                     help="Number of frames to read divided by 3.")
 parser.add_argument('--output_dir', default=None,
