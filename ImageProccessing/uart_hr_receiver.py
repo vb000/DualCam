@@ -16,7 +16,7 @@ parser.add_argument('--frame_height', default=480, type=int,
                     help="Frame height.")
 parser.add_argument('--pixel_size', default=2, type=int,
                     help="Pixel size in bytes.")
-parser.add_argument('--timeout_per_frame', default=1, type=int,
+parser.add_argument('--timeout_per_frame', default=1.0, type=float,
                     help="Timeout per frame.")
 parser.add_argument('--footer_size', default=3, type=int,
                     help="Size of the footer sent after each frame in bytes.")
