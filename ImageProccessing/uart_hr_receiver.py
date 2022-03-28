@@ -34,6 +34,11 @@ def find_footer(buf):
             return i+3
         i = i+1
 
+def print_data(buf, offset, n_bytes):
+    d = np.frombuffer(buf, dtype=np.uint8, count=n_bytes,
+                          offset=offset)
+    print(d)
+
 def uart_read_video(dev, rate, width, height, pix_depth, footer_size,
                     timestamp_size, timeout, n_frames, frame_decoder,
                     output_dir):
