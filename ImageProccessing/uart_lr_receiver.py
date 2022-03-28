@@ -31,7 +31,7 @@ parser.add_argument('--csv_dir', default=0, type=int,
                     help="Write raw csv files along with the images.")
 
 
-def lr_decoder(frame, w, h, bpp):
+def lr_decoder(frame, h, w, bpp):
     return np.reshape(frame, (w, h))
 
 if __name__ == "__main__":
