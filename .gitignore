@@ -51,6 +51,11 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# Editors
+*.swp
+*.swo
+.DS_Store/
+
 # IDE outputs
 .metadata/
 Debug/
