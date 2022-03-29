@@ -6,7 +6,7 @@ import cv2
 
 parser = argparse.ArgumentParser(
     description="Reads data from uart and writes PNG output images.")
-parser.add_argument('--input_device', default='/dev/tty.usbmodem142103',
+parser.add_argument('--input_device', default='/dev/tty.usbmodem14103',
                     help="Input directory with RAW pixel data.")
 parser.add_argument('--input_rate', default=7e6,
                     help="Input baud rate.")
