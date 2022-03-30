@@ -7,9 +7,9 @@ from uart_hr_receiver import uart_read_video
 
 parser = argparse.ArgumentParser(
     description="Reads data from uart and writes PNG output images.")
-parser.add_argument('--input_device', default='/dev/tty.usbserial-FT3NKYBD',
+parser.add_argument('--input_device', default='/dev/tty.usbmodem14103',
                     help="Input directory with RAW pixel data.")
-parser.add_argument('--input_rate', default=2.95e6,
+parser.add_argument('--input_rate', default=6.0e6,
                     help="Input baud rate.")
 parser.add_argument('--timeout_per_frame', default=0.07, type=float,
                     help="Timeout per frame.")

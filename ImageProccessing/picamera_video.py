@@ -3,6 +3,7 @@ import os
 import tracemalloc
 import picamera
 import time
+from gpiozero import LED
 
 parser = argparse.ArgumentParser(
     description="Records a video from PiCamera.")
@@ -25,6 +26,9 @@ class Output(object):
         if not os.path.exists(self.out_dir):
             os.makedirs(self.out_dir)
         self.stats = stats
+        self.led = LED(17)
+        self.led.on()
+        self.origin_time = time.time_ns() // 1000
         if self.stats != 0:
             self.prev_t_stamp = None
             self.frame_count = 0
@@ -33,7 +37,8 @@ class Output(object):
 
     def write(self, s):
         t_stamp = time.time_ns() // 1000
-        filename = os.path.join(self.out_dir, '%d.jpg' % t_stamp)
+        t_delta_ms = (t_stamp - self.origin_time) // 1000
+        filename = os.path.join(self.out_dir, '%d.jpg' % t_delta_ms)
         with open(filename, 'wb') as f:
             f.write(s)
         if self.stats != 0:
@@ -45,6 +50,7 @@ class Output(object):
             self.frame_count += 1
 
     def flush(self):
+        self.led.off()
         if self.stats != 0:
             print('%d frames are written' % self.frame_count)
             print("Avg. time period between frames = %d us" %
