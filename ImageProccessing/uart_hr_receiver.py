@@ -6,7 +6,7 @@ import cv2
 
 parser = argparse.ArgumentParser(
     description="Reads data from uart and writes PNG output images.")
-parser.add_argument('--input_device', default='/dev/tty.usbmodem142103',
+parser.add_argument('--input_device', default='/dev/tty.usbmodem14103',
                     help="Input directory with RAW pixel data.")
 parser.add_argument('--input_rate', default=7e6,
                     help="Input baud rate.")
@@ -67,6 +67,7 @@ def uart_read_video(dev, rate, width, height, pix_depth, footer_size,
                                    offset=offset)
         time_stamp = int.from_bytes(time_stamp.tobytes(), "little",
                                     signed="False")
+        time_stamp = int(time_stamp * 0.9765)
         offset += timestamp_size
         footer = np.frombuffer(data_buffer, dtype=np.uint8, count=footer_size,
                                offset=offset)
