@@ -26,8 +26,10 @@ class Output(object):
         if not os.path.exists(self.out_dir):
             os.makedirs(self.out_dir)
         self.stats = stats
-        self.led = LED(17)
-        self.led.on()
+        self.led1 = LED(17)
+        self.led2 = LED(18)
+        self.led1.on()
+        self.led2.on()
         self.origin_time = time.time_ns() // 1000
         if self.stats != 0:
             self.prev_t_stamp = None
@@ -50,7 +52,8 @@ class Output(object):
             self.frame_count += 1
 
     def flush(self):
-        self.led.off()
+        self.led1.off()
+        self.led2.off()
         if self.stats != 0:
             print('%d frames are written' % self.frame_count)
             print("Avg. time period between frames = %d us" %
