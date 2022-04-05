@@ -25,6 +25,7 @@ class Output(object):
         self.out_dir = out_dir
         if not os.path.exists(self.out_dir):
             os.makedirs(self.out_dir)
+        self.out_files = []
         self.stats = stats
         self.led1 = LED(17)
         self.led2 = LED(18)
@@ -50,8 +51,7 @@ class Output(object):
             self.out_dir,
             '%09d_%09d.jpg' % (self.frame_count,
                                t_delta_ms))
-        with open(filename, 'wb') as f:
-            f.write(s)
+        self.out_files.append({'name': filename, 'data': s})
         if self.stats != 0:
             t_stamp_end = time.time_ns() // 1000
             write_time = t_stamp_end - t_stamp
@@ -68,6 +68,9 @@ class Output(object):
     def flush(self):
         self.led1.off()
         self.led2.off()
+        for fd in self.out_files:
+            with open(fd['name'], 'wb') as f:
+                f.write(fd['data'])
         if self.stats != 0:
             print("%d frames are written" % self.frame_count)
             print("Max time period = %d us" % self.max_time_period)

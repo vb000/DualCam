@@ -78,7 +78,7 @@ def uart_read_video(dev, rate, width, height, pix_depth, footer_size,
         if output_dir is not None:
             # Write rgb to output file
             frame = frame_decoder(frame, height, width, pix_depth)
-            out_file_path = os.path.join(output_dir, '%08d_%08d.png' % (i, time_stamp))
+            out_file_path = os.path.join(output_dir, '%09d_%09d.png' % (i, time_stamp))
             cv2.imwrite(out_file_path, frame)
 
 def yuv_decoder(frame, h, w, bpp):
