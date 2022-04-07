@@ -4,6 +4,7 @@ import tracemalloc
 import picamera
 import time
 from gpiozero import LED
+import threading
 
 parser = argparse.ArgumentParser(
     description="Records a video from PiCamera.")
@@ -20,12 +21,22 @@ parser.add_argument('--output_dir', default='data',
 parser.add_argument('--stats', default=0, type=int,
                     help="Enable stats.")
 
+def save(outfiles):
+    for fd in outfiles:
+        with open(fd['name'], 'wb') as f:
+            f.write(fd['data'])
+
 class Output(object):
-    def __init__(self, out_dir=None, stats=0):
+    def __init__(self, camera, out_dir=None, stats=0):
+        self.camera = camera
         self.out_dir = out_dir
         if not os.path.exists(self.out_dir):
             os.makedirs(self.out_dir)
-        self.out_files = []
+        self.out_arrays = [[], []]
+        self.out_array = 0
+        self.out_files = self.out_arrays[0]
+        self.save_thread = None
+        self.save_after = 150
         self.stats = stats
         self.led1 = LED(17)
         self.led2 = LED(18)
@@ -33,7 +44,6 @@ class Output(object):
         self.led2.on()
         self.origin_time = time.time_ns() // 1000
         self.frame_count = 0
-        self.prev_t_stamp = self.origin_time
         if self.stats != 0:
             self.max_time_period = 0
             self.max_write_time = 0
@@ -41,9 +51,18 @@ class Output(object):
             self.total_time_period = 0
 
     def write(self, s):
-        t_stamp = time.time_ns() // 1000
-        time_period = t_stamp - self.prev_t_stamp
-        if self.frame_count > 1 and time_period > 100000:
+        #print("%d: len_0=%d, len_1=%d, len=%d" %
+        #      (self.frame_count, len(self.out_arrays[0]),
+        #       len(self.out_arrays[1]), len(self.out_files)))
+        if self.frame_count == 0:
+            self.t_stamp_0 = time.time_ns() // 1000
+            t_stamp = self.t_stamp_0
+            self.prev_t_stamp = self.t_stamp_0
+        else:
+            t_stamp = self.t_stamp_0 + self.camera.frame.timestamp
+            time_period = t_stamp - self.prev_t_stamp
+
+        if self.frame_count > 1 and time_period > 80000:
             print("Frame rate error at frame %d: time period = %d" % (
                 self.frame_count, time_period))
         t_delta_ms = (t_stamp - self.origin_time) // 1000
@@ -52,6 +71,18 @@ class Output(object):
             '%09d_%09d.jpg' % (self.frame_count,
                                t_delta_ms))
         self.out_files.append({'name': filename, 'data': s})
+        if len(self.out_files) >= self.save_after:
+            if self.save_thread is not None:
+                assert not self.save_thread.is_alive(), \
+                        "Save thread not done before next save."
+            self.save_thread = threading.Thread(
+                    target=save,
+                    args=(self.out_arrays[self.out_array],))
+            self.save_thread.start()
+            self.out_array = (self.out_array + 1) % 2
+            self.out_arrays[self.out_array].clear()
+            self.out_files = self.out_arrays[self.out_array]
+
         if self.stats != 0:
             t_stamp_end = time.time_ns() // 1000
             write_time = t_stamp_end - t_stamp
@@ -68,9 +99,8 @@ class Output(object):
     def flush(self):
         self.led1.off()
         self.led2.off()
-        for fd in self.out_files:
-            with open(fd['name'], 'wb') as f:
-                f.write(fd['data'])
+        self.save_thread.join()
+        save(self.out_files)
         if self.stats != 0:
             print("%d frames are written" % self.frame_count)
             print("Max time period = %d us" % self.max_time_period)
@@ -87,7 +117,7 @@ if __name__ == "__main__":
     with picamera.PiCamera() as camera:
         camera.resolution = (args.width, args.height)
         camera.framerate = args.frame_rate
-        camera.start_recording(Output(args.output_dir, args.stats),
+        camera.start_recording(Output(camera, args.output_dir, args.stats),
                                format='mjpeg',
                                quality=100)
         camera.wait_recording(args.record_time)
